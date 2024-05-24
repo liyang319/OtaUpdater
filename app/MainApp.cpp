@@ -24,6 +24,44 @@ using namespace std;
 #define DEVICE_SN "123456789"
 
 int i = 0;
+
+int DoOTA(std::string json)
+{
+    // 解析JSON字符串
+    rapidjson::Document document;
+    document.Parse(json.c_str());
+    std::string outputFile = "good.zip";
+
+    // 检查解析是否成功
+    if (!document.IsObject())
+    {
+        std::cout << "解析失败！" << std::endl;
+        return 0;
+    }
+
+    // 从JSON中获取值
+    std::string status = document["status"].GetString();
+    std::string newVer = document["newVer"].GetString();
+    std::string url = document["url"].GetString();
+    std::string md5 = document["md5"].GetString();
+
+    // 打印获取的值
+    std::cout << "状态: " << status << std::endl;
+    std::cout << "是否有新版本: " << newVer << std::endl;
+    std::cout << "URL: " << url << std::endl;
+    std::cout << "MD5: " << md5 << std::endl;
+    if (newVer == "true")
+    {
+        cout << "===============" << endl;
+        int downloadRes = HttpUtility::httpdownload(url, outputFile);
+        if (downloadRes == CURLE_OK)
+        {
+            std::cout << "File downloaded to: " << outputFile << std::endl;
+        }
+    }
+    return 1;
+}
+
 void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
@@ -61,6 +99,7 @@ void OtaCheck()
     {
         std::cout << "Get request successful" << std::endl;
         std::cout << "Response: " << response << std::endl;
+        DoOTA(response);
     }
 }
 
@@ -70,7 +109,7 @@ int main()
     {
         OtaCheck();
         // std::this_thread::sleep_for(std::chrono::hours(1));
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(100));
     }
     return 0;
 }
