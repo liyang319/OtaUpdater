@@ -5,7 +5,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/log)
 include_directories(${PROJECT_SOURCE_DIR}/include/network)
 include_directories(${PROJECT_SOURCE_DIR}/include/utility)
 include_directories(${PROJECT_SOURCE_DIR}/include/thirdparty)
-# include_directories(${PROJECT_SOURCE_DIR}/include/rapidjson)
+include_directories(${PROJECT_SOURCE_DIR}/include/thirdparty/rapidjson)
 
 # add compile tree
 add_subdirectory(config)
