@@ -65,7 +65,7 @@
 
 int main()
 {
-    std::string url = "http://192.168.80.235:8000/ota/good.zip";
+    std::string url = "http://192.168.80.235:8000/otadd/good.zip";
     std::string params = "key=value";
     std::string outputFile = "good.zip";
     std::string response;

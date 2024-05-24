@@ -46,7 +46,13 @@ CURLcode HttpUtility::httpget(const std::string &url, const std::string &params,
 
 CURLcode HttpUtility::httpdownload(const std::string &url, const std::string &outputFile, long timeout)
 {
-    CURL *curl = nullptr;
+    if (!urlExists(url))
+    {
+        std::cout << "URL does not exist" << std::endl;
+        return CURLE_URL_MALFORMAT;
+    }
+
+    CURL *curl;
     CURLcode res;
     std::ofstream file(outputFile, std::ios::binary);
 
@@ -74,4 +80,25 @@ CURLcode HttpUtility::httpdownload(const std::string &url, const std::string &ou
 
     file.close();
     return res;
+}
+
+bool HttpUtility::urlExists(const std::string &url)
+{
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L); // Perform HEAD request
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+        if (res == CURLE_OK)
+        {
+            long response_code;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+            return (response_code == 200);
+        }
+    }
+    return false;
 }
