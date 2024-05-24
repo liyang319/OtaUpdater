@@ -16,7 +16,9 @@ size_t HttpUtility::write_callback_download(void *ptr, size_t size, size_t nmemb
 
 CURLcode HttpUtility::httpget(const std::string &url, const std::string &params, std::string &response, long timeout)
 {
-    std::string full_url = url + "?" + params;
+    std::string full_url = url + params;
+    // std::string full_url = "http://192.168.80.235:8000/otacheck?cmd=otacheck&sn=123456789&version=1.2.3";
+    std::cout << full_url << std::endl;
     CURL *curl;
     CURLcode res;
     response = "";
@@ -101,4 +103,22 @@ bool HttpUtility::urlExists(const std::string &url)
         }
     }
     return false;
+}
+
+std::string HttpUtility::buildQueryString(std::map<std::string, std::string> &params)
+{
+    std::string queryParams = "";
+    for (auto it = params.begin(); it != params.end(); ++it)
+    {
+        if (queryParams.empty())
+        {
+            queryParams += "?";
+        }
+        else
+        {
+            queryParams += "&";
+        }
+        queryParams += it->first + "=" + it->second;
+    }
+    return queryParams;
 }

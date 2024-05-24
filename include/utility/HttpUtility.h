@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <fstream>
+#include <map>
 
 class HttpUtility
 {
@@ -13,6 +14,7 @@ public:
     static CURLcode httpget(const std::string &url, const std::string &params, std::string &response, long timeout = 30);
     static CURLcode httpdownload(const std::string &url, const std::string &outputFile, long timeout = 30);
     static bool urlExists(const std::string &url);
+    static std::string buildQueryString(std::map<std::string, std::string> &params);
 };
 
 #endif

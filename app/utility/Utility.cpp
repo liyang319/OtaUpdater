@@ -6,25 +6,51 @@
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
-std::string Utility::getFileContent(const std::string &filename)
+// std::string Utility::getFileContent(const std::string &filename)
+// {
+//     std::ifstream file(filename);
+//     if (file.is_open())
+//     {
+//         std::string content;
+//         std::string line;
+//         while (std::getline(file, line))
+//         {
+//             content += line + "\n";
+//         }
+//         file.close();
+//         return content;
+//     }
+//     else
+//     {
+//         std::cerr << "Error opening file " << filename << std::endl;
+//         return "";
+//     }
+// }
+
+std::string Utility::getFileContent(std::string fileName)
 {
-    std::ifstream file(filename);
+    std::ifstream file(fileName);
+    std::string content;
+    std::string line;
+
     if (file.is_open())
     {
-        std::string content;
-        std::string line;
         while (std::getline(file, line))
         {
-            content += line + "\n";
+            content += line;
+            if (!file.eof())
+            {
+                content += "\n";
+            }
         }
         file.close();
-        return content;
     }
     else
     {
-        std::cerr << "Error opening file " << filename << std::endl;
-        return "";
+        std::cerr << "Error opening file: " << fileName << std::endl;
     }
+
+    return content;
 }
 
 std::string Utility::calculateMD5(const std::string &file_path)
