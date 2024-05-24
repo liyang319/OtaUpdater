@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(KewellMidware VERSION 1.0.0)
+
+# set(ARM ON) 
+
+# if(${ARM})
+#     set(ARM_CROSS /usr/local/arm/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin)
+#     set(CMAKE_CXX_COMPILER ${ARM_CROSS}/arm-linux-gnueabihf-g++)
+# endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Wall -std=c++11 -lpthread -lcurl")
+
+add_subdirectory(app)

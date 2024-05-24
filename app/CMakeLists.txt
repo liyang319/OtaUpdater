@@ -1,0 +1,29 @@
+# include sub directories
+include_directories(${PROJECT_SOURCE_DIR}/include/base)
+include_directories(${PROJECT_SOURCE_DIR}/include/config)
+include_directories(${PROJECT_SOURCE_DIR}/include/log)
+include_directories(${PROJECT_SOURCE_DIR}/include/network)
+include_directories(${PROJECT_SOURCE_DIR}/include/utility)
+include_directories(${PROJECT_SOURCE_DIR}/include/thirdparty)
+# include_directories(${PROJECT_SOURCE_DIR}/include/rapidjson)
+
+# add compile tree
+add_subdirectory(config)
+add_subdirectory(log)
+add_subdirectory(network)
+add_subdirectory(utility)
+
+# all source files
+file(GLOB_RECURSE ALL_SOURCE "*.cpp" "*.c")
+
+find_library(curl
+  NAMES curl
+  PATHS ${PROJECT_SOURCE_DIR}/lib
+)
+
+# create the executable
+set(EXECUTABLE_NAME OtaUpdater)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/output)
+
+# execute file 
+add_executable(${EXECUTABLE_NAME} ${ALL_SOURCE})
