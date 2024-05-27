@@ -20,8 +20,14 @@ file(GLOB_RECURSE ALL_SOURCE "*.cpp" "*.c")
 #   NAMES curl
 #   PATHS ${PROJECT_SOURCE_DIR}/lib
 # )
+# set(ARM OFF) 
 
-link_directories(${PROJECT_SOURCE_DIR}/lib)
+if(${ARM})
+  link_directories(${PROJECT_SOURCE_DIR}/lib)
+else()
+  link_directories(${PROJECT_SOURCE_DIR}/lib/x86_libcurl)
+endif()
+
 
 # create the executable
 set(EXECUTABLE_NAME OtaUpdater)
