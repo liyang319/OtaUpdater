@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <openssl/md5.h>
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
@@ -109,4 +110,33 @@ int Utility::changeFileMode(std::string filename, std::string mode)
         std::cerr << "文件权限修改失败" << std::endl;
     }
     return result;
+}
+
+std::string Utility::calculateMD5(std::string filename)
+{
+    std::ifstream file(filename, std::ios::binary);
+    if (!file)
+    {
+        return "";
+    }
+
+    MD5_CTX ctx;
+    MD5_Init(&ctx);
+
+    char buffer[1024] = {0};
+    while (file.read(buffer, sizeof(buffer)))
+    {
+        MD5_Update(&ctx, buffer, file.gcount());
+    }
+
+    unsigned char result[MD5_DIGEST_LENGTH];
+    MD5_Final(result, &ctx);
+
+    std::stringstream ss;
+    for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+    {
+        ss << std::hex << std::setfill('0') << std::setw(2) << (int)result[i];
+    }
+
+    return ss.str();
 }

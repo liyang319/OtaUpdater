@@ -23,9 +23,11 @@ file(GLOB_RECURSE ALL_SOURCE "*.cpp" "*.c")
 # set(ARM OFF) 
 
 if(${ARM})
-  link_directories(${PROJECT_SOURCE_DIR}/lib)
+  link_directories(${PROJECT_SOURCE_DIR}/lib/arm/libcurl)
+  link_directories(${PROJECT_SOURCE_DIR}/lib/arm/openssl)
 else()
-  link_directories(${PROJECT_SOURCE_DIR}/lib/x86_libcurl)
+  link_directories(${PROJECT_SOURCE_DIR}/lib/x86/libcurl)
+  link_directories(${PROJECT_SOURCE_DIR}/lib/x86/openssl)
 endif()
 
 

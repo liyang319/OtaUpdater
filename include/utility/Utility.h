@@ -13,6 +13,7 @@ public:
     static int runFile(std::string executablePath, bool bBackground);
     static int killApp(std::string processName);
     static int changeFileMode(std::string filename, std::string mode);
+    static std::string calculateMD5(std::string filename);
 };
 
 #endif // UTILITY_H
