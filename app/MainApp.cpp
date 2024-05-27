@@ -23,10 +23,10 @@ using namespace std;
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
 #define APP_NAME "ControlBox"
-// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-// #define DEFAULT_APP_PATH "/home/app/ControlBox"
-#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/home/app/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 
 int i = 0;
 

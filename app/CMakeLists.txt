@@ -16,10 +16,12 @@ add_subdirectory(utility)
 # all source files
 file(GLOB_RECURSE ALL_SOURCE "*.cpp" "*.c")
 
-find_library(curl
-  NAMES curl
-  PATHS ${PROJECT_SOURCE_DIR}/lib
-)
+# find_library(CURL
+#   NAMES curl
+#   PATHS ${PROJECT_SOURCE_DIR}/lib
+# )
+
+link_directories(${PROJECT_SOURCE_DIR}/lib)
 
 # create the executable
 set(EXECUTABLE_NAME OtaUpdater)
@@ -27,3 +29,5 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/output)
 
 # execute file 
 add_executable(${EXECUTABLE_NAME} ${ALL_SOURCE})
+
+target_link_libraries(${EXECUTABLE_NAME} curl)
