@@ -28,11 +28,11 @@ using namespace rapidjson;
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
 #define APP_NAME "ControlBox"
-// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-// #define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+//#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+//#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 
 int i = 0;
 int DoOTA(std::string json)
@@ -69,6 +69,8 @@ int DoOTA(std::string json)
             std::cout << "File downloaded to: " << outputFile << std::endl;
             // downld OK
             sleep(1);
+            std::string md5 = Utility::calculateMD5("./ControlBox");
+            std::cout<<"-----------md5------------\n"<< md5 <<std::endl;
             Utility::changeFileMode(DEFAULT_OTA_SAVE_PATH, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
@@ -104,12 +106,12 @@ void OtaCheck()
 
 int main()
 {
-    // while (true)
-    // {
-    //     OtaCheck();
-    //     // std::this_thread::sleep_for(std::chrono::hours(1));
-    //     std::this_thread::sleep_for(std::chrono::seconds(100));
-    // }
+    while (true)
+    {
+        OtaCheck();
+        // std::this_thread::sleep_for(std::chrono::hours(1));
+        std::this_thread::sleep_for(std::chrono::seconds(100));
+    }
     // std::string md5 = get_file_md5("./ControlBox");
     // std::string md5 = Utility::calculateMD5("./ControlBox");
     // Utility::RunFile(DEFAULT_APP_PATH, true);

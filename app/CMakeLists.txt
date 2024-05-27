@@ -39,3 +39,5 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/output)
 add_executable(${EXECUTABLE_NAME} ${ALL_SOURCE})
 
 target_link_libraries(${EXECUTABLE_NAME} curl)
+target_link_libraries(${EXECUTABLE_NAME} ssl)
+target_link_libraries(${EXECUTABLE_NAME} crypto)
