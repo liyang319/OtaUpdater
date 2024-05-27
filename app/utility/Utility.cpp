@@ -136,3 +136,46 @@ std::string Utility::calculateMD5(const std::string &file_path)
 
     return stream.str();
 }
+
+int Utility::ReplaceFileWithCmd(std::string orginalFile, std::string newFile)
+{
+    std::string command = "cp " + newFile + " " + orginalFile;
+    int result = system(command.c_str()); // 执行命令行
+
+    if (result == 0)
+    {
+        return 0; // 成功
+    }
+    else
+    {
+        return -1; // 失败
+    }
+}
+
+int ReplaceFile(const std::string orginalFile, const std::string newFile)
+{
+    std::ifstream newFileInput(newFile);
+    if (!newFileInput)
+    {
+        std::cerr << "Error: Unable to open new file" << std::endl;
+        return -1;
+    }
+
+    std::ofstream orginalFileOutput(orginalFile);
+    if (!orginalFileOutput)
+    {
+        std::cerr << "Error: Unable to open orginal file" << std::endl;
+        return -1;
+    }
+
+    orginalFileOutput << newFileInput.rdbuf();
+
+    return 0;
+}
+
+int Utility::RunFile(std::string executablePath)
+{
+    std::string command = "./" + executablePath; // 构建启动可执行文件的命令行
+    int result = system(command.c_str());        // 执行命令行
+    return result;
+}

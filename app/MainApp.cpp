@@ -22,15 +22,34 @@ using namespace std;
 
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
+#define APP_NAME "ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_back/ControlBox"
+#define DEFAULT_APP_PATH "/home/app/ControlBox"
 
 int i = 0;
+
+int KillApp(std::string processName)
+{
+    // std::string processName = "example_process";     // 要杀死的进程名字
+    std::string command = "pkill -f " + processName; // 构造要执行的命令
+    int result = system(command.c_str());            // 执行命令
+    if (result == 0)
+    {
+        std::cout << "进程 " << processName << " 已成功被杀死。" << std::endl;
+    }
+    else
+    {
+        std::cerr << "无法杀死进程 " << processName << "。" << std::endl;
+    }
+    return result;
+}
 
 int DoOTA(std::string json)
 {
     // 解析JSON字符串
     rapidjson::Document document;
     document.Parse(json.c_str());
-    std::string outputFile = "good.zip";
+    std::string outputFile = DEFAULT_OTA_SAVE_PATH;
 
     // 检查解析是否成功
     if (!document.IsObject())
@@ -57,6 +76,13 @@ int DoOTA(std::string json)
         if (downloadRes == CURLE_OK)
         {
             std::cout << "File downloaded to: " << outputFile << std::endl;
+            // downld OK
+            sleep(1);
+            KillApp(APP_NAME);
+            sleep(1);
+            Utility::ReplaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
+            sleep(1);
+            Utility::RunFile(DEFAULT_APP_PATH);
         }
     }
     return 1;
@@ -66,25 +92,6 @@ void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
     string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
-    // cout << "----------" << strVer << "----" << strVer.length() << endl;
-
-    // Document document;
-    // document.SetObject();
-    // // Add values to the document
-    // rapidjson::Value verVal;
-    // verVal.SetString(strVer.c_str(), document.GetAllocator());
-    // // rapidjson::Value snVal;
-    // // verVal.SetString(strVer.c_str(), document.GetAllocator());
-
-    // document.AddMember("cmd", "otacheck", document.GetAllocator());
-    // document.AddMember("version", verVal, document.GetAllocator());
-    // document.AddMember("sn", DEVICE_SN, document.GetAllocator());
-    // // Convert the document to a string
-    // StringBuffer buffer;
-    // Writer<StringBuffer> writer(buffer);
-    // document.Accept(writer);
-    // // Print the JSON string
-    // std::cout << buffer.GetString() << std::endl;
 
     std::map<string, string> mapParam = {
         {"cmd", "otacheck"},
@@ -111,23 +118,4 @@ int main()
         // std::this_thread::sleep_for(std::chrono::hours(1));
         std::this_thread::sleep_for(std::chrono::seconds(100));
     }
-    return 0;
 }
-
-// std::string url = "http://192.168.80.235:8000/ota/good.zip";
-// std::string params = "key=value";
-// std::string outputFile = "good.zip";
-// std::string response;
-
-// CURLcode getRes = HttpUtility::httpget("http://192.168.80.235:8000/otacheck", "", response);
-// if (getRes == CURLE_OK)
-// {
-//     std::cout << "Get request successful" << std::endl;
-//     std::cout << "Response: " << response << std::endl;
-// }
-
-// CURLcode downloadRes = HttpUtility::httpdownload(url, outputFile);
-// if (downloadRes == CURLE_OK)
-// {
-//     std::cout << "File downloaded to: " << outputFile << std::endl;
-// }
