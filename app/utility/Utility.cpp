@@ -173,9 +173,14 @@ int ReplaceFile(const std::string orginalFile, const std::string newFile)
     return 0;
 }
 
-int Utility::RunFile(std::string executablePath)
+int Utility::RunFile(std::string executablePath, bool bBackground)
 {
-    std::string command = "./" + executablePath; // 构建启动可执行文件的命令行
-    int result = system(command.c_str());        // 执行命令行
+    // std::string command = "./" + executablePath; // 构建启动可执行文件的命令行
+    // int result = system(command.c_str());        // 执行命令行
+    // return result;
+    std::string command = executablePath; // 使用绝对路径启动可执行文件
+    if (bBackground)
+        command += " &";
+    int result = system(command.c_str()); // 执行命令行
     return result;
 }

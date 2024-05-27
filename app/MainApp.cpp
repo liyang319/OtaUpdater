@@ -23,8 +23,10 @@ using namespace std;
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
 #define APP_NAME "ControlBox"
-#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_back/ControlBox"
-#define DEFAULT_APP_PATH "/home/app/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+// #define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 
 int i = 0;
 
@@ -82,7 +84,7 @@ int DoOTA(std::string json)
             sleep(1);
             Utility::ReplaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
             sleep(1);
-            Utility::RunFile(DEFAULT_APP_PATH);
+            Utility::RunFile(DEFAULT_APP_PATH, true);
         }
     }
     return 1;
@@ -118,4 +120,6 @@ int main()
         // std::this_thread::sleep_for(std::chrono::hours(1));
         std::this_thread::sleep_for(std::chrono::seconds(100));
     }
+    // Utility::RunFile(DEFAULT_APP_PATH, true);
+    // printf("---------\n");
 }
