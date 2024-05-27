@@ -23,29 +23,13 @@ using namespace std;
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
 #define APP_NAME "ControlBox"
-#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/home/app/ControlBox"
-// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+// #define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define DEFAULT_APP_RIGHTS "777"
+#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 
 int i = 0;
-
-int KillApp(std::string processName)
-{
-    // std::string processName = "example_process";     // 要杀死的进程名字
-    std::string command = "pkill -f " + processName; // 构造要执行的命令
-    int result = system(command.c_str());            // 执行命令
-    if (result == 0)
-    {
-        std::cout << "进程 " << processName << " 已成功被杀死。" << std::endl;
-    }
-    else
-    {
-        std::cerr << "无法杀死进程 " << processName << "。" << std::endl;
-    }
-    return result;
-}
-
 int DoOTA(std::string json)
 {
     // 解析JSON字符串
@@ -80,11 +64,12 @@ int DoOTA(std::string json)
             std::cout << "File downloaded to: " << outputFile << std::endl;
             // downld OK
             sleep(1);
-            KillApp(APP_NAME);
+            Utility::changeFileMode(DEFAULT_OTA_SAVE_PATH, DEFAULT_APP_RIGHTS);
+            Utility::killApp(APP_NAME);
             sleep(1);
-            Utility::ReplaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
+            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
             sleep(1);
-            Utility::RunFile(DEFAULT_APP_PATH, true);
+            Utility::runFile(DEFAULT_APP_PATH, true);
         }
     }
     return 1;
