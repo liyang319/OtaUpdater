@@ -117,25 +117,31 @@ std::string Utility::calculateMD5(std::string filename)
     std::ifstream file(filename, std::ios::binary);
     if (!file)
     {
+        std::cerr << "Cannot open file: " << filename << std::endl;
         return "";
     }
 
     MD5_CTX ctx;
     MD5_Init(&ctx);
 
-    char buffer[1024] = {0};
-    while (file.read(buffer, sizeof(buffer)))
+    char buffer[1024];
+    while (file)
     {
-        MD5_Update(&ctx, buffer, file.gcount());
+        file.read(buffer, sizeof(buffer));
+        std::streamsize count = file.gcount();
+        if (count > 0)
+        {
+            MD5_Update(&ctx, buffer, count);
+        }
     }
 
-    unsigned char result[MD5_DIGEST_LENGTH];
-    MD5_Final(result, &ctx);
+    unsigned char md[MD5_DIGEST_LENGTH];
+    MD5_Final(md, &ctx);
 
     std::stringstream ss;
-    for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+    for (int i = 0; i < MD5_DIGEST_LENGTH; ++i)
     {
-        ss << std::hex << std::setfill('0') << std::setw(2) << (int)result[i];
+        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md[i]);
     }
 
     return ss.str();

@@ -15,10 +15,15 @@
 #include "writer.h"
 #include <thread>
 #include <chrono>
+
+#include <openssl/md5.h>
+#include <iomanip>
+#include <sstream>
+
 // #include "Base.h"
 
 using namespace rapidjson;
-using namespace std;
+// maeusing namespace std;
 
 #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEVICE_SN "123456789"
@@ -57,7 +62,7 @@ int DoOTA(std::string json)
     std::cout << "MD5: " << md5 << std::endl;
     if (newVer == "true")
     {
-        cout << "===============" << endl;
+        std::cout << "===============" << std::endl;
         int downloadRes = HttpUtility::httpdownload(url, outputFile);
         if (downloadRes == CURLE_OK)
         {
@@ -78,16 +83,16 @@ int DoOTA(std::string json)
 void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
-    string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
+    std::string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
 
-    std::map<string, string> mapParam = {
+    std::map<std::string, std::string> mapParam = {
         {"cmd", "otacheck"},
         {"version", strVer},
         {"sn", DEVICE_SN}};
 
-    string strParam = HttpUtility::buildQueryString(mapParam);
+    std::string strParam = HttpUtility::buildQueryString(mapParam);
     std::string response;
-    cout << strParam << endl;
+    std::cout << strParam << std::endl;
     CURLcode getRes = HttpUtility::httpget("http://192.168.80.235:8000/otacheck", strParam, response, 1000);
     if (getRes == CURLE_OK)
     {
@@ -99,12 +104,14 @@ void OtaCheck()
 
 int main()
 {
-    while (true)
-    {
-        OtaCheck();
-        // std::this_thread::sleep_for(std::chrono::hours(1));
-        std::this_thread::sleep_for(std::chrono::seconds(100));
-    }
+    // while (true)
+    // {
+    //     OtaCheck();
+    //     // std::this_thread::sleep_for(std::chrono::hours(1));
+    //     std::this_thread::sleep_for(std::chrono::seconds(100));
+    // }
+    // std::string md5 = get_file_md5("./ControlBox");
+    // std::string md5 = Utility::calculateMD5("./ControlBox");
     // Utility::RunFile(DEFAULT_APP_PATH, true);
-    // printf("---------\n");
+    // printf("------md5--%s-\n", md5.c_str());
 }
