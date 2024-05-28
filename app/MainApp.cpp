@@ -20,7 +20,7 @@
 #include <iomanip>
 #include <sstream>
 
-// #include "Base.h"
+#include "Base.h"
 
 using namespace rapidjson;
 // maeusing namespace std;
@@ -34,6 +34,7 @@ using namespace rapidjson;
 #define DEFAULT_APP_RIGHTS "777"
 #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
 #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+#define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
 
 int i = 0;
 int DoOTA(std::string json)
@@ -109,7 +110,7 @@ void OtaCheck()
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     std::string response;
     std::cout << strParam << std::endl;
-    CURLcode getRes = HttpUtility::httpget("http://192.168.80.235:8000/otacheck", strParam, response, 1000);
+    CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
     if (getRes == CURLE_OK)
     {
         std::cout << "Get request successful" << std::endl;
@@ -123,11 +124,7 @@ int main()
     while (true)
     {
         OtaCheck();
-        // std::this_thread::sleep_for(std::chrono::hours(1));
-        std::this_thread::sleep_for(std::chrono::seconds(100));
+        std::this_thread::sleep_for(std::chrono::hours(1));
+        // std::this_thread::sleep_for(std::chrono::seconds(1000));
     }
-    // std::string md5 = get_file_md5("./ControlBox");
-    // std::string md5 = Utility::calculateMD5("./ControlBox");
-    // Utility::RunFile(DEFAULT_APP_PATH, true);
-    // printf("------md5--%s-\n", md5.c_str());
 }
