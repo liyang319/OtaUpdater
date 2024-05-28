@@ -26,13 +26,14 @@ using namespace rapidjson;
 // maeusing namespace std;
 
 #define DEFAULT_VERSION_PATH "../app/VERSION"
+// #define DEFAULT_VERSION_PATH "/home/app/VERSION"
 #define DEVICE_SN "123456789"
 #define APP_NAME "ControlBox"
-#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/home/app/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+// #define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-//#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-//#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 
 int i = 0;
 int DoOTA(std::string json)
@@ -51,16 +52,18 @@ int DoOTA(std::string json)
 
     // 从JSON中获取值
     std::string status = document["status"].GetString();
-    std::string newVer = document["newVer"].GetString();
+    std::string needUpdate = document["needUpdate"].GetString();
     std::string url = document["url"].GetString();
     std::string md5 = document["md5"].GetString();
+    std::string newVer = document["newVer"].GetString();
 
     // 打印获取的值
     std::cout << "状态: " << status << std::endl;
-    std::cout << "是否有新版本: " << newVer << std::endl;
+    std::cout << "是否有新版本: " << needUpdate << std::endl;
     std::cout << "URL: " << url << std::endl;
     std::cout << "MD5: " << md5 << std::endl;
-    if (newVer == "true")
+    std::cout << "newVer: " << newVer << std::endl;
+    if (needUpdate == "true")
     {
         std::cout << "===============" << std::endl;
         int downloadRes = HttpUtility::httpdownload(url, outputFile);
@@ -69,15 +72,26 @@ int DoOTA(std::string json)
             std::cout << "File downloaded to: " << outputFile << std::endl;
             // downld OK
             sleep(1);
-            std::string md5 = Utility::calculateMD5("./ControlBox");
-            std::cout<<"-----------md5------------\n"<< md5 <<std::endl;
+            std::string otaMd5 = Utility::calculateMD5(DEFAULT_OTA_SAVE_PATH);
+            std::cout << " ----md5---- " << md5 << std::endl;
+            if (md5 != otaMd5)
+            {
+                std::cout << " ----md5 fail---- " << std::endl;
+                return 0;
+            }
             Utility::changeFileMode(DEFAULT_OTA_SAVE_PATH, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
+            std::cout << " ----replace---- " << std::endl;
             Utility::replaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
+            Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
             sleep(1);
             Utility::runFile(DEFAULT_APP_PATH, true);
         }
+    }
+    else
+    {
+        std::cout << " ----no new Version---- " << std::endl;
     }
     return 1;
 }

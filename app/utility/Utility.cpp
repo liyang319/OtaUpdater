@@ -146,3 +146,24 @@ std::string Utility::calculateMD5(std::string filename)
 
     return ss.str();
 }
+
+void Utility::fillVersionFile(std::string filename, std::string content)
+{
+    // Open the file in out mode to clear the original content
+    std::ofstream file(filename, std::ios::out | std::ios::trunc);
+
+    if (file.is_open())
+    {
+        // Write the new content to the file
+        file << content;
+
+        // Close the file
+        file.close();
+
+        std::cout << "Content written to " << filename << " successfully." << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error opening file " << filename << std::endl;
+    }
+}

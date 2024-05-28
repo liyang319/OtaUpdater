@@ -14,6 +14,7 @@ public:
     static int killApp(std::string processName);
     static int changeFileMode(std::string filename, std::string mode);
     static std::string calculateMD5(std::string filename);
+    static void fillVersionFile(std::string filename, std::string content);
 };
 
 #endif // UTILITY_H
