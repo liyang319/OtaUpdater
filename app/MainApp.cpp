@@ -35,6 +35,7 @@ using namespace rapidjson;
 #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
 #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 #define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
+#define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
 
 int i = 0;
 int DoOTA(std::string json)
@@ -127,4 +128,6 @@ int main()
         std::this_thread::sleep_for(std::chrono::hours(1));
         // std::this_thread::sleep_for(std::chrono::seconds(1000));
     }
+    // int res = HttpUtility::httpUploadFile(URL_UPLOAD_LOG, "test.txt", "test.txt");
+    // std::cout << "-----------" << std::endl;
 }

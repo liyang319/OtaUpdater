@@ -15,6 +15,8 @@ public:
     static CURLcode httpdownload(const std::string &url, const std::string &outputFile, long timeout = 30);
     static bool urlExists(const std::string &url);
     static std::string buildQueryString(std::map<std::string, std::string> &params);
+    static size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
+    static int httpUploadFile(std::string url, std::string filePath, std::string fileName);
 };
 
 #endif
