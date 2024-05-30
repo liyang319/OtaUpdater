@@ -105,8 +105,9 @@ void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
     std::string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
-    std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
-    std::cout << "---------------" << deviceSN << std::endl;
+    // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
+    // std::cout << "---------------" << deviceSN << std::endl;
+    std::string deviceSN = DEVICE_SN;
 
     std::map<std::string, std::string> mapParam = {
         {"cmd", "otacheck"},
@@ -125,7 +126,7 @@ void OtaCheck()
     }
 }
 
-int DoLogOperation(std::string json)
+int DoLogOperation(std::string json, std::string deviceSN)
 {
     // 解析JSON字符串
     rapidjson::Document document;
@@ -156,7 +157,7 @@ int DoLogOperation(std::string json)
         // Do upload here
         std::string logFileName = "controlbox_" + logDate + ".log";
         COUT << "-----logfile-----" << logFileName << endl;
-        HttpUtility::httpUploadFile(URL_UPLOAD_LOG, logFileName, logFileName);
+        HttpUtility::httpUploadFile(URL_UPLOAD_LOG, logFileName, logFileName, deviceSN);
     }
 }
 
@@ -165,11 +166,13 @@ void LogCheck()
     std::cout << "=========LogCheck=======" << i++ << std::endl;
     std::string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
     // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
+    std::string deviceSN = DEVICE_SN;
 
-    std::map<std::string, std::string> mapParam = {
-        {"cmd", "logcheck"},
-        {"version", strVer},
-        {"sn", DEVICE_SN}};
+    std::map<std::string, std::string>
+        mapParam = {
+            {"cmd", "logcheck"},
+            {"version", strVer},
+            {"sn", deviceSN}};
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     std::string response;
     CURLcode getRes = HttpUtility::httpget(URL_CHECK_LOG, strParam, response, 1000);
@@ -177,21 +180,21 @@ void LogCheck()
     {
         COUT << "Get request successful" << endl;
         COUT << "Response: " << response << endl;
-        DoLogOperation(response);
+        DoLogOperation(response, deviceSN);
     }
 }
 
 int main()
 {
-    // int index = 0;
-    // while (true)
-    // {
-    //     // OtaCheck();
-    //     // std::this_thread::sleep_for(std::chrono::hours(1));
-    //     std::this_thread::sleep_for(std::chrono::seconds(1));
-    //     COUT << "---------------" << index++ << endl;
-    // }
-    // int res = HttpUtility::httpUploadFile(URL_UPLOAD_LOG, "test.txt", "test.txt");
-    // std::cout << "-----------" << std::endl;
-    LogCheck();
+    int index = 0;
+    while (true)
+    {
+        if (index % 10 == 0)
+            OtaCheck();
+        else
+            LogCheck();
+        // std::this_thread::sleep_for(std::chrono::hours(1));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        COUT << "---------------" << index++ << endl;
+    }
 }

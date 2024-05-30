@@ -17,6 +17,7 @@ public:
     static std::string buildQueryString(std::map<std::string, std::string> &params);
     static size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
     static int httpUploadFile(std::string url, std::string filePath, std::string fileName);
+    static int httpUploadFile(std::string url, std::string filePath, std::string fileName, std::string deviceSN);
 };
 
 #endif
