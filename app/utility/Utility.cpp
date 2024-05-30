@@ -7,6 +7,16 @@
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
+std::string Utility::removeTrailingNewline(std::string str)
+{
+    std::string modifiedStr = str;
+    if (!modifiedStr.empty() && modifiedStr.back() == '\n')
+    {
+        modifiedStr.erase(modifiedStr.length() - 1);
+    }
+    return modifiedStr;
+}
+
 std::string Utility::getFileContent(std::string fileName)
 {
     std::ifstream file(fileName);

@@ -104,7 +104,7 @@ int DoOTA(std::string json)
 void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
-    std::string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
+    std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
     // std::cout << "---------------" << deviceSN << std::endl;
     std::string deviceSN = DEVICE_SN;
@@ -116,7 +116,6 @@ void OtaCheck()
 
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     std::string response;
-    std::cout << strParam << std::endl;
     CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
     if (getRes == CURLE_OK)
     {
@@ -164,7 +163,7 @@ int DoLogOperation(std::string json, std::string deviceSN)
 void LogCheck()
 {
     std::cout << "=========LogCheck=======" << i++ << std::endl;
-    std::string strVer = Utility::getFileContent(DEFAULT_VERSION_PATH);
+    std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
     std::string deviceSN = DEVICE_SN;
 

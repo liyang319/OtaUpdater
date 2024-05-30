@@ -6,6 +6,7 @@
 class Utility
 {
 public:
+    static std::string removeTrailingNewline(std::string str);
     static std::string getFileContent(std::string filename);
     // static std::string calculateMD5(const std::string &file_path);
     static int replaceFileWithCmd(std::string orginalFile, std::string newFile);
