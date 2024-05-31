@@ -25,15 +25,15 @@
 using namespace rapidjson;
 // maeusing namespace std;
 
-#define DEFAULT_VERSION_PATH "../app/VERSION"
-// #define DEFAULT_VERSION_PATH "/var/version"
+// #define DEFAULT_VERSION_PATH "../app/VERSION"
+#define DEFAULT_VERSION_PATH "/var/version"
 #define DEVICE_SN "4854604D7765A027"
 #define APP_NAME "ControlBox"
-// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-// #define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
+#define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
+// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 #define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
 #define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
 #define URL_CHECK_LOG "http://192.168.80.235:8000/logcheck"
@@ -89,7 +89,7 @@ int DoOTA(std::string json)
             sleep(1);
             std::cout << " ----replace---- " << std::endl;
             Utility::replaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
-            Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
+            // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
             sleep(1);
             Utility::runFile(DEFAULT_APP_PATH, true);
         }
@@ -105,9 +105,8 @@ void OtaCheck()
 {
     std::cout << "=========OtaCheck=======" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
-    // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
-    // std::cout << "---------------" << deviceSN << std::endl;
-    std::string deviceSN = DEVICE_SN;
+    std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
+    // std::string deviceSN = DEVICE_SN;
 
     std::map<std::string, std::string> mapParam = {
         {"cmd", "otacheck"},
@@ -164,8 +163,8 @@ void LogCheck()
 {
     std::cout << "=========LogCheck=======" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
-    // std::string deviceSN = Utility::getFileContent(DEFAULT_SN_FILE_PATH);
-    std::string deviceSN = DEVICE_SN;
+    std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
+    // std::string deviceSN = DEVICE_SN;
 
     std::map<std::string, std::string>
         mapParam = {
