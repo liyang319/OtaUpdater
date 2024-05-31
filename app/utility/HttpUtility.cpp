@@ -146,7 +146,7 @@ int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::stri
             curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "filename", CURLFORM_COPYCONTENTS, fileName.c_str(), CURLFORM_END);
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+            // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
             CURLcode res = curl_easy_perform(curl);
             if (res != CURLE_OK)
@@ -176,47 +176,48 @@ int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::stri
     }
 }
 
+
+size_t HttpUtility::write_callback_upload(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    return written;
+}
+
 int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::string fileName, std::string deviceSN)
 {
-    CURL *curl = curl_easy_init();
+    CURL *curl;
+    CURLcode res;
+    struct curl_httppost *formpost = NULL;
+    struct curl_httppost *lastptr = NULL;
+    struct curl_slist *headerlist = NULL;
+    static const char buf[] = "Expect:";
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_END);
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "fileName", CURLFORM_COPYCONTENTS, fileName.c_str(), CURLFORM_END);
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "deviceSN", CURLFORM_COPYCONTENTS, deviceSN.c_str(), CURLFORM_END);
+    curl = curl_easy_init();
+
     if (curl)
     {
-        FILE *file = fopen(filePath.c_str(), "rb");
-        if (file)
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback_upload);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+        headerlist = curl_slist_append(headerlist, buf);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+        res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK)
         {
-            struct curl_httppost *formpost = NULL;
-            struct curl_httppost *lastptr = NULL;
-            curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_END);
-            curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "filename", CURLFORM_COPYCONTENTS, fileName.c_str(), CURLFORM_END);
-            curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "deviceSN", CURLFORM_COPYCONTENTS, deviceSN.c_str(), CURLFORM_END);
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-            CURLcode res = curl_easy_perform(curl);
-            if (res != CURLE_OK)
-            {
-                std::cerr << "Failed to upload file: " << curl_easy_strerror(res) << std::endl;
-                curl_formfree(formpost);
-                fclose(file);
-                curl_easy_cleanup(curl);
-                return 1;
-            }
-            curl_formfree(formpost);
-            fclose(file);
-            curl_easy_cleanup(curl);
-            return 0;
-        }
-        else
-        {
-            std::cerr << "Failed to open file: " << filePath << std::endl;
-            curl_easy_cleanup(curl);
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
+
+        curl_easy_cleanup(curl);
+        curl_formfree(formpost);
+        curl_slist_free_all(headerlist);
     }
-    else
-    {
-        std::cerr << "Failed to initialize libcurl" << std::endl;
-        return 1;
-    }
+
+    return 0;
 }

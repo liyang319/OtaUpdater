@@ -18,6 +18,7 @@ public:
     static size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
     static int httpUploadFile(std::string url, std::string filePath, std::string fileName);
     static int httpUploadFile(std::string url, std::string filePath, std::string fileName, std::string deviceSN);
+    static size_t write_callback_upload(void *ptr, size_t size, size_t nmemb, void *stream);
 };
 
 #endif
