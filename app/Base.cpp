@@ -16,7 +16,7 @@ Base::~Base()
 }
 
 // 当前时间
-string Base::currentTime() 
+string Base::currentTime()
 {
     time_t t = time(nullptr);
     char buffer[80];
@@ -24,9 +24,17 @@ string Base::currentTime()
     return std::string(buffer);
 }
 
+string Base::currentDay()
+{
+    time_t t = time(nullptr);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d", localtime(&t));
+    return std::string(buffer);
+}
+
 string Base::fileName(string *path)
 {
-    string fileName = path->substr(path->find_last_of('/')+1);
+    string fileName = path->substr(path->find_last_of('/') + 1);
     delete path;
     return fileName;
 }
