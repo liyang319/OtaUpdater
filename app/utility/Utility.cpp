@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
@@ -113,6 +114,7 @@ int Utility::killApp(std::string processName)
 int Utility::changeFileMode(std::string filename, std::string mode)
 {
     std::string command = "chmod " + mode + " " + filename;
+    std::cout << "---cmd = " << command << std::endl;
     int result = system(command.c_str());
     if (result == 0)
     {

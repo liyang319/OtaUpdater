@@ -25,20 +25,20 @@
 using namespace rapidjson;
 // maeusing namespace std;
 
-#define DEFAULT_VERSION_PATH "../app/VERSION"
-// #define DEFAULT_VERSION_PATH "/var/version"
+// #define DEFAULT_VERSION_PATH "../app/VERSION"
+#define DEFAULT_VERSION_PATH "/var/version"
 #define DEVICE_SN "4854604D7765A027"
 #define APP_NAME "ControlBox"
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
 #define APP_BASE_PATH "/home/app/"
-// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
-// #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
-// #define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
+#define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
+#define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
-#define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
-#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
+// #define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
+// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 #define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
 #define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
 #define URL_CHECK_LOG "http://192.168.80.235:8000/logcheck"
@@ -110,16 +110,16 @@ int DoOTA(std::string json)
                 return 0;
             }
             // 备份原有版本到ota_backup
-            OtaBackup();
+            // OtaBackup();
             COUT << "---------Unzip package-----------" << endl;
             Utility::unzipFile(outputFile, DEFAULT_OTA_SAVE_PATH);
-            Utility::changeFileMode(outputFile, DEFAULT_APP_RIGHTS);
+            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
             std::cout << " ---------replace old version---- " << std::endl;
-            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, outputFile);
+            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
             // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
-            sleep(1);
+            sleep(5);
             int status = Utility::runFile(DEFAULT_APP_PATH, true);
             if (status == 0)
             {
@@ -129,7 +129,7 @@ int DoOTA(std::string json)
             {
                 COUT << "启动失败" << endl;
             }
-            // Utility::deleteFiles(DEFAULT_OTA_SAVE_PATH);
+            Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         }
     }
     else
@@ -223,14 +223,15 @@ void LogCheck()
 int main()
 {
     int index = 0;
-    while (true)
-    {
-        if (index % 10 == 0)
-            OtaCheck();
-        else
-            LogCheck();
-        // std::this_thread::sleep_for(std::chrono::hours(1));
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        COUT << "---------------" << index++ << endl;
-    }
+    // while (true)
+    // {
+    //     if (index % 10 == 0)
+    //         OtaCheck();
+    //     else
+    //         LogCheck();
+    //     // std::this_thread::sleep_for(std::chrono::hours(1));
+    //     std::this_thread::sleep_for(std::chrono::seconds(2));
+    //     COUT << "---------------" << index++ << endl;
+    // }
+    OtaCheck();
 }
