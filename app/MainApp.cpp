@@ -32,18 +32,19 @@ using namespace rapidjson;
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
 #define APP_BASE_PATH "/home/app/"
-#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
-#define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
-#define DEFAULT_APP_PATH "/home/app/ControlBox"
+// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
+// #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
+// #define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
-// #define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
-// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
+#define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
+#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 #define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
 #define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
 #define URL_CHECK_LOG "http://192.168.80.235:8000/logcheck"
 #define DEFAULT_SN_FILE_PATH "/var/sn"
 #define LOGVAL_NEED_UPLOAD "upload"
+#define MAX_LAUNCH_TRY_TIME 3
 
 // #define CONCAT(x, y) x##y
 // #define FULL_PATH(x, y) CONCAT(x, y)
@@ -52,6 +53,7 @@ int i = 0;
 
 void OtaRecovery()
 {
+    COUT << "OtaRecovery" << endl;
 }
 
 void OtaBackup()
@@ -120,16 +122,26 @@ int DoOTA(std::string json)
             Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
             // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
             sleep(5);
-            int status = Utility::runFile(DEFAULT_APP_PATH, true);
-            if (status == 0)
+            int tryTime = 0;
+            int launchStatus = -1;
+            while (tryTime++ < MAX_LAUNCH_TRY_TIME)
             {
-                COUT << "启动成功" << endl;
+                launchStatus = Utility::runFile(DEFAULT_APP_PATH, true);
+                if (launchStatus == 0)
+                {
+                    COUT << "-------启动成功" << endl;
+                    break;
+                }
+                else
+                {
+                    COUT << "-------启动失败" << endl;
+                }
             }
-            else
+            if (launchStatus != 0)
             {
-                COUT << "启动失败" << endl;
+                OtaRecovery();
             }
-            Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
+            // Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         }
     }
     else
@@ -233,5 +245,14 @@ int main()
     //     std::this_thread::sleep_for(std::chrono::seconds(2));
     //     COUT << "---------------" << index++ << endl;
     // }
-    OtaCheck();
+    // OtaCheck();/Users/yli/Desktop/PythonServer/DjangoServer/ota_server/ota
+    bool bLaunched = Utility::startApp("/Users/yli/Desktop/PythonServer/DjangoServer/ota_server/ota/ControlBox", true);
+    if (bLaunched)
+    {
+        COUT << "-------启动成功" << endl;
+    }
+    else
+    {
+        COUT << "-------启动失败" << endl;
+    }
 }

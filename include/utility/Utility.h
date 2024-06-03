@@ -22,6 +22,9 @@ public:
     static bool deleteDirectory(std::string dir);
     static bool createDirIfNotExist(std::string dirPath);
     static bool copyFileTo(std::string filePath, std::string dstPath);
+    static bool fileExists(std::string fileName);
+    static bool isExecutable(std::string fileName);
+    static bool startApp(std::string executablePath, bool bBackground);
 };
 
 #endif // UTILITY_H

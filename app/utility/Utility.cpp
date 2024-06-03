@@ -331,3 +331,40 @@ bool Utility::copyFileTo(std::string filePath, std::string dstPath)
 
     return true;
 }
+
+bool Utility::fileExists(std::string fileName)
+{
+    std::ifstream file(fileName);
+    return file.good();
+}
+
+bool Utility::isExecutable(std::string fileName)
+{
+    return access(fileName.c_str(), X_OK) == 0;
+}
+
+bool Utility::startApp(std::string executablePath, bool bBackground)
+{
+    if (!fileExists(executablePath))
+    {
+        std::cout << "File " << executablePath << " does not exist" << std::endl;
+        return false;
+    }
+    if (!isExecutable(executablePath))
+    {
+        std::cout << "File " << executablePath << " is not executable" << std::endl;
+        return false;
+    }
+    std::string command = executablePath; // 使用绝对路径启动可执行文件
+    if (bBackground)
+        command += " &";
+    int result = system(command.c_str());
+    if (result == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
