@@ -16,6 +16,12 @@ public:
     static int changeFileMode(std::string filename, std::string mode);
     static std::string calculateMD5(std::string filename);
     static void fillVersionFile(std::string filename, std::string content);
+    static int unzipFile(std::string zipFileName, std::string outputDirectory);
+    static std::string getFilenameFromUrl(std::string url);
+    static void deleteFiles(std::string dir);
+    static bool deleteDirectory(std::string dir);
+    static bool createDirIfNotExist(std::string dirPath);
+    static bool copyFileTo(std::string filePath, std::string dstPath);
 };
 
 #endif // UTILITY_H

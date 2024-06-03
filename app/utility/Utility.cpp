@@ -4,6 +4,9 @@
 #include <sstream>
 #include <iomanip>
 #include "openssl/md5.h"
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
@@ -176,4 +179,153 @@ void Utility::fillVersionFile(std::string filename, std::string content)
     {
         std::cerr << "Error opening file " << filename << std::endl;
     }
+}
+
+int Utility::unzipFile(std::string zipFileName, std::string outputDirectory)
+{
+    std::string command = "unzip " + zipFileName + " -d " + outputDirectory;
+    int result = system(command.c_str());
+    // if (result != 0)
+    // {
+    //     std::cerr << "Error: Failed to unzip file " << zipFileName << std::endl;
+    // }
+    return result;
+}
+
+std::string Utility::getFilenameFromUrl(std::string url)
+{
+    size_t found = url.find_last_of("/\\");
+    if (found != std::string::npos)
+    {
+        return url.substr(found + 1);
+    }
+    else
+    {
+        return "";
+    }
+}
+
+void Utility::deleteFiles(std::string dir)
+{
+    DIR *dp = opendir(dir.c_str());
+    if (dp != NULL)
+    {
+        struct dirent *ep;
+        while ((ep = readdir(dp)))
+        {
+            if (ep->d_type == DT_REG)
+            { // regular file
+                std::string filePath = dir + "/" + ep->d_name;
+                if (remove(filePath.c_str()) != 0)
+                {
+                    std::cerr << "Failed to delete file: " << filePath << std::endl;
+                }
+            }
+        }
+        closedir(dp);
+    }
+    else
+    {
+        std::cerr << "Failed to open directory: " << dir << std::endl;
+    }
+}
+
+bool Utility::deleteDirectory(std::string dir)
+{
+    DIR *dp = opendir(dir.c_str());
+    if (dp != NULL)
+    {
+        struct dirent *ep;
+        bool success = true;
+        while ((ep = readdir(dp)))
+        {
+            if (ep->d_type == DT_DIR)
+            { // directory
+                if (strcmp(ep->d_name, ".") != 0 && strcmp(ep->d_name, "..") != 0)
+                {
+                    std::string subDirPath = dir + "/" + ep->d_name;
+                    if (!deleteDirectory(subDirPath))
+                    {
+                        success = false;
+                    }
+                }
+            }
+            else if (ep->d_type == DT_REG)
+            { // regular file
+                std::string filePath = dir + "/" + ep->d_name;
+                if (remove(filePath.c_str()) != 0)
+                {
+                    std::cerr << "Failed to delete file: " << filePath << std::endl;
+                    success = false;
+                }
+            }
+        }
+        closedir(dp);
+        if (rmdir(dir.c_str()) != 0)
+        {
+            std::cerr << "Failed to delete directory: " << dir << std::endl;
+            success = false;
+        }
+        return success;
+    }
+    else
+    {
+        std::cerr << "Failed to open directory: " << dir << std::endl;
+        return false;
+    }
+}
+
+bool Utility::createDirIfNotExist(std::string dirPath)
+{
+    struct stat st;
+    if (stat(dirPath.c_str(), &st) != 0)
+    {
+        if (mkdir(dirPath.c_str(), 0777) == 0)
+        {
+            return true;
+        }
+        else
+        {
+            std::cerr << "Failed to create directory: " << dirPath << std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        if (S_ISDIR(st.st_mode))
+        {
+            std::cout << "Directory already exists: " << dirPath << std::endl;
+            return true;
+        }
+        else
+        {
+            std::cerr << dirPath << " is not a directory" << std::endl;
+            return false;
+        }
+    }
+}
+
+bool Utility::copyFileTo(std::string filePath, std::string dstPath)
+{
+    std::ifstream srcFile(filePath, std::ios::binary);
+    if (!srcFile)
+    {
+        std::cerr << "Failed to open source file: " << filePath << std::endl;
+        return false;
+    }
+
+    std::string dstFilePath = dstPath + "/" + filePath.substr(filePath.find_last_of('/') + 1);
+    std::ofstream dstFile(dstFilePath, std::ios::binary);
+    if (!dstFile)
+    {
+        srcFile.close();
+        std::cerr << "Failed to create destination file: " << dstFilePath << std::endl;
+        return false;
+    }
+    dstFile << srcFile.rdbuf();
+
+    srcFile.close();
+    dstFile.close();
+
+    return true;
 }

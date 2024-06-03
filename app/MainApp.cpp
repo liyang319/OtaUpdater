@@ -25,28 +25,47 @@
 using namespace rapidjson;
 // maeusing namespace std;
 
-// #define DEFAULT_VERSION_PATH "../app/VERSION"
-#define DEFAULT_VERSION_PATH "/var/version"
+#define DEFAULT_VERSION_PATH "../app/VERSION"
+// #define DEFAULT_VERSION_PATH "/var/version"
 #define DEVICE_SN "4854604D7765A027"
 #define APP_NAME "ControlBox"
-#define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/ControlBox"
-#define DEFAULT_APP_PATH "/home/app/ControlBox"
+#define CONFIG_NAME "ControlBox.ini"
+#define UPDATER_NAME "OtaUpdater"
+#define APP_BASE_PATH "/home/app/"
+// #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
+// #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
+// #define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ota_save/ControlBox"
-// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
+#define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
+#define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
+#define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
 #define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
 #define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
 #define URL_CHECK_LOG "http://192.168.80.235:8000/logcheck"
 #define DEFAULT_SN_FILE_PATH "/var/sn"
 #define LOGVAL_NEED_UPLOAD "upload"
 
+// #define CONCAT(x, y) x##y
+// #define FULL_PATH(x, y) CONCAT(x, y)
+
 int i = 0;
+
+void OtaRecovery()
+{
+}
+
+void OtaBackup()
+{
+    Utility::copyFileTo(APP_NAME, DEFAULT_OTA_BACKUP_PATH);
+    Utility::copyFileTo(CONFIG_NAME, DEFAULT_OTA_BACKUP_PATH);
+    Utility::copyFileTo(UPDATER_NAME, DEFAULT_OTA_BACKUP_PATH);
+}
+
 int DoOTA(std::string json)
 {
     // 解析JSON字符串
     rapidjson::Document document;
     document.Parse(json.c_str());
-    std::string outputFile = DEFAULT_OTA_SAVE_PATH;
 
     // 检查解析是否成功
     if (!document.IsObject())
@@ -71,27 +90,46 @@ int DoOTA(std::string json)
     if (needUpdate == "true")
     {
         std::cout << "===============" << std::endl;
+        // 创建升级包保存位置ota_save
+        Utility::createDirIfNotExist(DEFAULT_OTA_SAVE_PATH);
+        // 创建原程序备份位置ota_backup
+        Utility::createDirIfNotExist(DEFAULT_OTA_BACKUP_PATH);
+
+        std::string outputFile = DEFAULT_OTA_SAVE_PATH + Utility::getFilenameFromUrl(url);
         int downloadRes = HttpUtility::httpdownload(url, outputFile);
         if (downloadRes == CURLE_OK)
         {
             std::cout << "File downloaded to: " << outputFile << std::endl;
             // downld OK
             sleep(1);
-            std::string otaMd5 = Utility::calculateMD5(DEFAULT_OTA_SAVE_PATH);
+            std::string otaMd5 = Utility::calculateMD5(outputFile);
             std::cout << " ----md5---- " << md5 << std::endl;
             if (md5 != otaMd5)
             {
                 std::cout << " ----md5 fail---- " << std::endl;
                 return 0;
             }
-            Utility::changeFileMode(DEFAULT_OTA_SAVE_PATH, DEFAULT_APP_RIGHTS);
+            // 备份原有版本到ota_backup
+            OtaBackup();
+            COUT << "---------Unzip package-----------" << endl;
+            Utility::unzipFile(outputFile, DEFAULT_OTA_SAVE_PATH);
+            Utility::changeFileMode(outputFile, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
-            std::cout << " ----replace---- " << std::endl;
-            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, DEFAULT_OTA_SAVE_PATH);
+            std::cout << " ---------replace old version---- " << std::endl;
+            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, outputFile);
             // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
             sleep(1);
-            Utility::runFile(DEFAULT_APP_PATH, true);
+            int status = Utility::runFile(DEFAULT_APP_PATH, true);
+            if (status == 0)
+            {
+                COUT << "启动成功" << endl;
+            }
+            else
+            {
+                COUT << "启动失败" << endl;
+            }
+            // Utility::deleteFiles(DEFAULT_OTA_SAVE_PATH);
         }
     }
     else
