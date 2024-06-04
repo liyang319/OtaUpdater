@@ -31,6 +31,8 @@ using namespace rapidjson;
 #define APP_NAME "ControlBox"
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
+#define RESTORE_SCRIPT_NAME "restore.sh"
+#define UPDATE_REPLACE_SCRIPT_NAME "update_replace.sh"
 #define APP_BASE_PATH "/home/app/"
 #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
 #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
@@ -54,10 +56,12 @@ int i = 0;
 void OtaRecovery()
 {
     COUT << "OtaRecovery" << endl;
+    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, false);
 }
 
 void OtaBackup()
 {
+    COUT << "OtaBackup" << endl;
     Utility::copyFileTo(APP_NAME, DEFAULT_OTA_BACKUP_PATH);
     Utility::copyFileTo(CONFIG_NAME, DEFAULT_OTA_BACKUP_PATH);
     Utility::copyFileTo(UPDATER_NAME, DEFAULT_OTA_BACKUP_PATH);
@@ -114,16 +118,18 @@ int DoOTA(std::string json)
                 return 0;
             }
             // 备份原有版本到ota_backup
-            // OtaBackup();
+            OtaBackup();
             COUT << "---------Unzip package-----------" << endl;
             Utility::unzipFile(outputFile, DEFAULT_OTA_SAVE_PATH);
-            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
+            // Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
             std::cout << " ---------replace old version---- " << std::endl;
             Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
+            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
+            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
             // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
-            sleep(5);
+            // sleep(5);
             int tryTime = 0;
             bool bLaunched = false;
             while (tryTime++ < MAX_LAUNCH_TRY_TIME)
@@ -143,6 +149,8 @@ int DoOTA(std::string json)
             {
                 OtaRecovery();
             }
+            // sleep(30);
+            // OtaRecovery();
             // Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         }
     }
