@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include "Base.h"
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
@@ -102,7 +103,7 @@ int Utility::killApp(std::string processName)
     int result = system(command.c_str());            // 执行命令
     if (result == 0)
     {
-        std::cout << "进程 " << processName << " 已成功被杀死。" << std::endl;
+        COUT << "进程 " << processName << " 已成功被杀死。" << std::endl;
     }
     else
     {
@@ -114,11 +115,11 @@ int Utility::killApp(std::string processName)
 int Utility::changeFileMode(std::string filename, std::string mode)
 {
     std::string command = "chmod " + mode + " " + filename;
-    std::cout << "---cmd = " << command << std::endl;
+    COUT << "---cmd = " << command << std::endl;
     int result = system(command.c_str());
     if (result == 0)
     {
-        std::cout << "文件权限修改成功" << std::endl;
+        COUT << "文件权限修改成功" << std::endl;
     }
     else
     {
@@ -175,7 +176,7 @@ void Utility::fillVersionFile(std::string filename, std::string content)
         // Close the file
         file.close();
 
-        std::cout << "Content written to " << filename << " successfully." << std::endl;
+        COUT << "Content written to " << filename << " successfully." << std::endl;
     }
     else
     {
@@ -296,7 +297,7 @@ bool Utility::createDirIfNotExist(std::string dirPath)
     {
         if (S_ISDIR(st.st_mode))
         {
-            std::cout << "Directory already exists: " << dirPath << std::endl;
+            COUT << "Directory already exists: " << dirPath << std::endl;
             return true;
         }
         else
@@ -347,12 +348,12 @@ bool Utility::startApp(std::string executablePath, bool bBackground)
 {
     if (!fileExists(executablePath))
     {
-        std::cout << "File " << executablePath << " does not exist" << std::endl;
+        COUT << "File " << executablePath << " does not exist" << std::endl;
         return false;
     }
     if (!isExecutable(executablePath))
     {
-        std::cout << "File " << executablePath << " is not executable" << std::endl;
+        COUT << "File " << executablePath << " is not executable" << std::endl;
         return false;
     }
     std::string command = executablePath; // 使用绝对路径启动可执行文件

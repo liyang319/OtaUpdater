@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <iostream>
 #include <chrono>
-// COUT << "Kewell Midware!" << endl;
 #include <iostream>
 #include <curl/curl.h>
 #include <fstream>
@@ -76,7 +75,7 @@ int DoOTA(std::string json)
     // 检查解析是否成功
     if (!document.IsObject())
     {
-        std::cout << "解析失败！" << std::endl;
+        COUT << "解析失败！" << std::endl;
         return 0;
     }
 
@@ -88,14 +87,14 @@ int DoOTA(std::string json)
     std::string newVer = document["newVer"].GetString();
 
     // 打印获取的值
-    std::cout << "状态: " << status << std::endl;
-    std::cout << "是否有新版本: " << needUpdate << std::endl;
-    std::cout << "URL: " << url << std::endl;
-    std::cout << "MD5: " << md5 << std::endl;
-    std::cout << "newVer: " << newVer << std::endl;
+    COUT << "状态: " << status << std::endl;
+    COUT << "是否有新版本: " << needUpdate << std::endl;
+    COUT << "URL: " << url << std::endl;
+    COUT << "MD5: " << md5 << std::endl;
+    COUT << "newVer: " << newVer << std::endl;
     if (needUpdate == "true")
     {
-        std::cout << "===============" << std::endl;
+        COUT << "===============" << std::endl;
         Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         Utility::deleteDirectory(DEFAULT_OTA_BACKUP_PATH);
         // 创建升级包保存位置ota_save
@@ -107,14 +106,14 @@ int DoOTA(std::string json)
         int downloadRes = HttpUtility::httpdownload(url, outputFile);
         if (downloadRes == CURLE_OK)
         {
-            std::cout << "File downloaded to: " << outputFile << std::endl;
+            COUT << "File downloaded to: " << outputFile << std::endl;
             // downld OK
             sleep(1);
             std::string otaMd5 = Utility::calculateMD5(outputFile);
-            std::cout << " ----md5---- " << md5 << std::endl;
+            COUT << " ----md5---- " << md5 << std::endl;
             if (md5 != otaMd5)
             {
-                std::cout << " ----md5 fail---- " << std::endl;
+                COUT << " ----md5 fail---- " << std::endl;
                 return 0;
             }
             // 备份原有版本到ota_backup
@@ -124,7 +123,7 @@ int DoOTA(std::string json)
             // Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
             Utility::killApp(APP_NAME);
             sleep(1);
-            std::cout << " ---------replace old version---- " << std::endl;
+            COUT << " ---------replace old version---- " << std::endl;
             Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
             Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
             Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
@@ -156,14 +155,14 @@ int DoOTA(std::string json)
     }
     else
     {
-        std::cout << " ----no new Version---- " << std::endl;
+        COUT << " ----no new Version---- " << std::endl;
     }
     return 1;
 }
 
 void OtaCheck()
 {
-    std::cout << "=========OtaCheck=======" << i++ << std::endl;
+    COUT << "=========OtaCheck=======" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
     // std::string deviceSN = DEVICE_SN;
@@ -178,8 +177,8 @@ void OtaCheck()
     CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
     if (getRes == CURLE_OK)
     {
-        std::cout << "Get request successful" << std::endl;
-        std::cout << "Response: " << response << std::endl;
+        COUT << "Get request successful" << std::endl;
+        COUT << "Response: " << response << std::endl;
         DoOTA(response);
     }
 }
@@ -221,7 +220,7 @@ int DoLogOperation(std::string json, std::string deviceSN)
 
 void LogCheck()
 {
-    std::cout << "=========LogCheck=======" << i++ << std::endl;
+    COUT << "=========LogCheck=======" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
     // std::string deviceSN = DEVICE_SN;

@@ -1,4 +1,5 @@
 #include "HttpUtility.h"
+#include "Base.h"
 
 size_t HttpUtility::write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -18,7 +19,6 @@ CURLcode HttpUtility::httpget(const std::string &url, const std::string &params,
 {
     std::string full_url = url + params;
     // std::string full_url = "http://192.168.80.235:8000/otacheck?cmd=otacheck&sn=123456789&version=1.2.3";
-    std::cout << full_url << std::endl;
     CURL *curl;
     CURLcode res;
     response = "";
@@ -34,11 +34,11 @@ CURLcode HttpUtility::httpget(const std::string &url, const std::string &params,
         {
             if (res == CURLE_OPERATION_TIMEDOUT)
             {
-                std::cout << "Request timed out" << std::endl;
+                COUT << "Request timed out" << std::endl;
             }
             else
             {
-                std::cout << "Request failed: " << curl_easy_strerror(res) << std::endl;
+                COUT << "Request failed: " << curl_easy_strerror(res) << std::endl;
             }
         }
         curl_easy_cleanup(curl);
@@ -50,7 +50,7 @@ CURLcode HttpUtility::httpdownload(const std::string &url, const std::string &ou
 {
     if (!urlExists(url))
     {
-        std::cout << "URL does not exist" << std::endl;
+        COUT << "URL does not exist" << std::endl;
         return CURLE_URL_MALFORMAT;
     }
 
@@ -70,11 +70,11 @@ CURLcode HttpUtility::httpdownload(const std::string &url, const std::string &ou
         {
             if (res == CURLE_OPERATION_TIMEDOUT)
             {
-                std::cout << "Download timed out" << std::endl;
+                COUT << "Download timed out" << std::endl;
             }
             else
             {
-                std::cout << "Download failed: " << curl_easy_strerror(res) << std::endl;
+                COUT << "Download failed: " << curl_easy_strerror(res) << std::endl;
             }
         }
         curl_easy_cleanup(curl);
