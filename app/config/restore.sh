@@ -4,6 +4,7 @@ srcPath="/home/app/ota_backup"
 desPath="/home/app"
 AppName="ControlBox"
 UpdaterName="OtaUpdater"
+fileList=("ControlBox" "OtaUpdater" "ControlBox.ini")
 
 # 检查源文件路径是否存在
 if [ -d "$srcPath" ]; then
@@ -14,11 +15,15 @@ if [ -d "$srcPath" ]; then
     pkill -f $UpdaterName
   fi
 
-  # 源文件路径存在，开始拷贝操作
-  for file in "$srcPath"/*; do
-    if [ -f "$file" ]; then
-      # 如果是文件，则进行拷贝
-      cp -f "$file" "$desPath"
+# 源文件路径存在，开始拷贝操作
+  for file in "${fileList[@]}"; do
+    srcFile="$srcPath/$file"
+    if [ -f "$srcFile" ]; then
+      # 如果是fileList中的文件，则进行拷贝并打印文件名
+      cp -f "$srcFile" "$desPath"
+      echo "拷贝文件: $file"
+    else
+      echo "$srcFile 不存在"
     fi
   done
 
