@@ -66,6 +66,39 @@ void OtaBackup()
     Utility::copyFileTo(UPDATER_NAME, DEFAULT_OTA_BACKUP_PATH);
 }
 
+void OtaReplace()
+{
+    Utility::killApp(APP_NAME);
+    sleep(1);
+    COUT << " ---------replace old version---- " << std::endl;
+    Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
+    Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
+    Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
+}
+
+void RestartApp()
+{
+    int tryTime = 0;
+    bool bLaunched = false;
+    while (tryTime++ < MAX_LAUNCH_TRY_TIME)
+    {
+        bLaunched = Utility::startApp(DEFAULT_APP_PATH, true);
+        if (bLaunched)
+        {
+            COUT << "-------启动成功" << endl;
+            break;
+        }
+        else
+        {
+            COUT << "-------启动失败" << endl;
+        }
+    }
+    if (!bLaunched)
+    {
+        OtaRecovery();
+    }
+}
+
 int DoOTA(std::string json)
 {
     // 解析JSON字符串
@@ -94,7 +127,7 @@ int DoOTA(std::string json)
     COUT << "newVer: " << newVer << std::endl;
     if (needUpdate == "true")
     {
-        COUT << "===============" << std::endl;
+        COUT << "========Has new Version=======" << std::endl;
         Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         Utility::deleteDirectory(DEFAULT_OTA_BACKUP_PATH);
         // 创建升级包保存位置ota_save
@@ -107,7 +140,6 @@ int DoOTA(std::string json)
         if (downloadRes == CURLE_OK)
         {
             COUT << "File downloaded to: " << outputFile << std::endl;
-            // downld OK
             sleep(1);
             std::string otaMd5 = Utility::calculateMD5(outputFile);
             COUT << " ----md5---- " << md5 << std::endl;
@@ -120,37 +152,10 @@ int DoOTA(std::string json)
             OtaBackup();
             COUT << "---------Unzip package-----------" << endl;
             Utility::unzipFile(outputFile, DEFAULT_OTA_SAVE_PATH);
-            // Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
-            Utility::killApp(APP_NAME);
-            sleep(1);
-            COUT << " ---------replace old version---- " << std::endl;
-            Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
-            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
-            Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
-            // Utility::fillVersionFile(DEFAULT_VERSION_PATH, newVer);
+            // 替换新文件
+            OtaReplace();
             // sleep(5);
-            int tryTime = 0;
-            bool bLaunched = false;
-            while (tryTime++ < MAX_LAUNCH_TRY_TIME)
-            {
-                bLaunched = Utility::startApp(DEFAULT_APP_PATH, true);
-                if (bLaunched)
-                {
-                    COUT << "-------启动成功" << endl;
-                    break;
-                }
-                else
-                {
-                    COUT << "-------启动失败" << endl;
-                }
-            }
-            if (!bLaunched)
-            {
-                OtaRecovery();
-            }
-            // sleep(30);
-            // OtaRecovery();
-            // Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
+            RestartApp();
         }
     }
     else
@@ -243,16 +248,18 @@ void LogCheck()
 
 int main()
 {
+    std::string ver = "11111111";
+    COUT << "========OTAUPDATER=============" << ver << endl;
     int index = 0;
-    // while (true)
-    // {
-    //     if (index % 10 == 0)
-    //         OtaCheck();
-    //     else
-    //         LogCheck();
-    //     // std::this_thread::sleep_for(std::chrono::hours(1));
-    //     std::this_thread::sleep_for(std::chrono::seconds(2));
-    //     COUT << "---------------" << index++ << endl;
-    // }
     OtaCheck();
+    while (true)
+    {
+        //     if (index % 10 == 0)
+        //         OtaCheck();
+        //     else
+        //         LogCheck();
+        //     // std::this_thread::sleep_for(std::chrono::hours(1));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        COUT << ver << "---------------" << index++ << endl;
+    }
 }
