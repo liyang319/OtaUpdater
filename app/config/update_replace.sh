@@ -1,6 +1,6 @@
 #!/bin/bash
 
-srcPath="/home/app/ota_backup"
+srcPath="/home/app/ota_save"
 desPath="/home/app"
 AppName="ControlBox"
 UpdaterName="OtaUpdater"
@@ -39,6 +39,7 @@ if [ -d "$srcPath" ]; then
       chmod 777 "$desPath/$UpdaterName"
       chmod 777 "$desPath/$AppName"
       "$desPath/$AppName" &
+      # 等待1秒
       sleep 3
       echo "启动$UpdaterName"
       "$desPath/$UpdaterName" &

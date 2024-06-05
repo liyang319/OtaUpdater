@@ -31,6 +31,7 @@ using namespace rapidjson;
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
 #define RESTORE_SCRIPT_NAME "restore.sh"
+#define REPLACE_SCRIPT_NAME "update_replace.sh"
 #define UPDATE_REPLACE_SCRIPT_NAME "update_replace.sh"
 #define APP_BASE_PATH "/home/app/"
 #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
@@ -55,7 +56,7 @@ int i = 0;
 void OtaRecovery()
 {
     COUT << "OtaRecovery" << endl;
-    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, false);
+    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, true);
 }
 
 void OtaBackup()
@@ -71,7 +72,14 @@ void OtaReplace()
     Utility::killApp(APP_NAME);
     sleep(1);
     COUT << " ---------replace old version---- " << std::endl;
-    Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
+    // Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
+    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + REPLACE_SCRIPT_NAME, true);
+}
+
+void OtaUnzipPkg(std::string pkgName)
+{
+    COUT << "---------Unzip package-----------" << endl;
+    Utility::unzipFile(pkgName, DEFAULT_OTA_SAVE_PATH);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
 }
@@ -150,8 +158,8 @@ int DoOTA(std::string json)
             }
             // 备份原有版本到ota_backup
             OtaBackup();
-            COUT << "---------Unzip package-----------" << endl;
-            Utility::unzipFile(outputFile, DEFAULT_OTA_SAVE_PATH);
+            // 解压升级包，修改权限
+            OtaUnzipPkg(outputFile);
             // 替换新文件
             OtaReplace();
             // sleep(5);
@@ -178,6 +186,7 @@ void OtaCheck()
         {"sn", DEVICE_SN}};
 
     std::string strParam = HttpUtility::buildQueryString(mapParam);
+    COUT << "====check params====" << strParam << endl;
     std::string response;
     CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
     if (getRes == CURLE_OK)
@@ -248,7 +257,7 @@ void LogCheck()
 
 int main()
 {
-    std::string ver = "11111111";
+    std::string ver = "111111";
     COUT << "========OTAUPDATER=============" << ver << endl;
     int index = 0;
     OtaCheck();
