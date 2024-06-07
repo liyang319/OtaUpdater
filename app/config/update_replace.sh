@@ -4,7 +4,8 @@ srcPath="/home/app/ota_save"
 desPath="/home/app"
 AppName="ControlBox"
 UpdaterName="OtaUpdater"
-fileList=("ControlBox" "OtaUpdater" "ControlBox.ini")
+# fileList=("ControlBox" "OtaUpdater" "ControlBox.ini")
+fileList=("ControlBox" "ControlBox.ini")
 
 # 检查源文件路径是否存在
 if [ -d "$srcPath" ]; then
@@ -12,7 +13,7 @@ if [ -d "$srcPath" ]; then
   if [ -f "$desPath/$AppName" ]; then
     echo "$AppName 文件存在，杀死$AppName进程"
     pkill -f $AppName
-    pkill -f $UpdaterName
+    # pkill -f $UpdaterName
   fi
 
 # 源文件路径存在，开始拷贝操作
@@ -36,13 +37,13 @@ if [ -d "$srcPath" ]; then
       echo "$AppName 文件存在，启动$AppName"
 
       # 给文件权限777
-      chmod 777 "$desPath/$UpdaterName"
+      # chmod 777 "$desPath/$UpdaterName"
       chmod 777 "$desPath/$AppName"
-      "$desPath/$AppName" &
+      # "$desPath/$AppName" &
       # 等待1秒
-      sleep 3
-      echo "启动$UpdaterName"
-      "$desPath/$UpdaterName" &
+      # sleep 3
+      # echo "启动$UpdaterName"
+      # "$desPath/$UpdaterName" &
     else
       echo "$AppName 文件不存在"
     fi

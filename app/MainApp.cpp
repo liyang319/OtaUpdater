@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "Base.h"
+#include "Version.h"
 
 using namespace rapidjson;
 // maeusing namespace std;
@@ -69,16 +70,16 @@ void OtaBackup()
 
 void OtaReplace()
 {
-    Utility::killApp(APP_NAME);
+    // Utility::killApp(APP_NAME);
     sleep(1);
-    COUT << " ---------replace old version---- " << std::endl;
+    COUT << "Replace old version" << std::endl;
     // Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
     Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + REPLACE_SCRIPT_NAME, true);
 }
 
 void OtaUnzipPkg(std::string pkgName)
 {
-    COUT << "---------Unzip package-----------" << endl;
+    COUT << "Unzip Ota package" << endl;
     Utility::unzipFile(pkgName, DEFAULT_OTA_SAVE_PATH);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
@@ -86,20 +87,23 @@ void OtaUnzipPkg(std::string pkgName)
 
 void RestartApp()
 {
+    COUT << "==================RestartApp==================" << endl;
     int tryTime = 0;
     bool bLaunched = false;
     while (tryTime++ < MAX_LAUNCH_TRY_TIME)
     {
+        COUT << "==================RestartApp==================" << tryTime << endl;
         bLaunched = Utility::startApp(DEFAULT_APP_PATH, true);
         if (bLaunched)
         {
-            COUT << "-------启动成功" << endl;
+            COUT << "ControlBox 启动成功" << endl;
             break;
         }
         else
         {
-            COUT << "-------启动失败" << endl;
+            COUT << "ControlBox 启动失败" << endl;
         }
+        sleep(1);
     }
     if (!bLaunched)
     {
@@ -116,7 +120,7 @@ int DoOTA(std::string json)
     // 检查解析是否成功
     if (!document.IsObject())
     {
-        COUT << "解析失败！" << std::endl;
+        COUT << "response解析失败！" << std::endl;
         return 0;
     }
 
@@ -135,7 +139,7 @@ int DoOTA(std::string json)
     COUT << "newVer: " << newVer << std::endl;
     if (needUpdate == "true")
     {
-        COUT << "========Has new Version=======" << std::endl;
+        COUT << "Has new version" << std::endl;
         Utility::deleteDirectory(DEFAULT_OTA_SAVE_PATH);
         Utility::deleteDirectory(DEFAULT_OTA_BACKUP_PATH);
         // 创建升级包保存位置ota_save
@@ -150,10 +154,10 @@ int DoOTA(std::string json)
             COUT << "File downloaded to: " << outputFile << std::endl;
             sleep(1);
             std::string otaMd5 = Utility::calculateMD5(outputFile);
-            COUT << " ----md5---- " << md5 << std::endl;
+            COUT << "Md5 checking" << md5 << std::endl;
             if (md5 != otaMd5)
             {
-                COUT << " ----md5 fail---- " << std::endl;
+                COUT << "Invalid Md5" << std::endl;
                 return 0;
             }
             // 备份原有版本到ota_backup
@@ -168,14 +172,14 @@ int DoOTA(std::string json)
     }
     else
     {
-        COUT << " ----no new Version---- " << std::endl;
+        COUT << "No new version" << std::endl;
     }
     return 1;
 }
 
 void OtaCheck()
 {
-    COUT << "=========OtaCheck=======" << i++ << std::endl;
+    COUT << "Checking OTA" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
     // std::string deviceSN = DEVICE_SN;
@@ -186,7 +190,7 @@ void OtaCheck()
         {"sn", DEVICE_SN}};
 
     std::string strParam = HttpUtility::buildQueryString(mapParam);
-    COUT << "====check params====" << strParam << endl;
+    // COUT << "====check params====" << strParam << endl;
     std::string response;
     CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
     if (getRes == CURLE_OK)
@@ -207,7 +211,7 @@ int DoLogOperation(std::string json, std::string deviceSN)
     // 检查解析是否成功
     if (!document.IsObject())
     {
-        COUT << "解析失败！" << endl;
+        COUT << "log请求response解析失败！" << endl;
         return 0;
     }
 
@@ -234,7 +238,7 @@ int DoLogOperation(std::string json, std::string deviceSN)
 
 void LogCheck()
 {
-    COUT << "=========LogCheck=======" << i++ << std::endl;
+    COUT << "Checking if need to upload log" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
     // std::string deviceSN = DEVICE_SN;
@@ -257,8 +261,7 @@ void LogCheck()
 
 int main()
 {
-    std::string ver = "111111";
-    COUT << "========OTAUPDATER=============" << ver << endl;
+    COUT << "=========OTAUPDATER=============" << VERSION << endl;
     int index = 0;
     OtaCheck();
     while (true)
@@ -269,6 +272,6 @@ int main()
         //         LogCheck();
         //     // std::this_thread::sleep_for(std::chrono::hours(1));
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        COUT << ver << "---------------" << index++ << endl;
+        COUT << VERSION << "---------------" << index++ << endl;
     }
 }
