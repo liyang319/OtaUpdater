@@ -32,7 +32,6 @@ using namespace rapidjson;
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
 #define RESTORE_SCRIPT_NAME "restore.sh"
-#define REPLACE_SCRIPT_NAME "update_replace.sh"
 #define UPDATE_REPLACE_SCRIPT_NAME "update_replace.sh"
 #define APP_BASE_PATH "/home/app/"
 #define DEFAULT_OTA_SAVE_PATH "/home/app/ota_save/"
@@ -57,7 +56,7 @@ int i = 0;
 void OtaRecovery()
 {
     COUT << "OtaRecovery" << endl;
-    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, true);
+    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, false);
 }
 
 void OtaBackup()
@@ -74,7 +73,7 @@ void OtaReplace()
     sleep(1);
     COUT << "Replace old version" << std::endl;
     // Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
-    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + REPLACE_SCRIPT_NAME, true);
+    Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + UPDATE_REPLACE_SCRIPT_NAME, false);
 }
 
 void OtaUnzipPkg(std::string pkgName)
@@ -83,6 +82,7 @@ void OtaUnzipPkg(std::string pkgName)
     Utility::unzipFile(pkgName, DEFAULT_OTA_SAVE_PATH);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
+    Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + UPDATE_REPLACE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
 }
 
 void RestartApp()
@@ -263,7 +263,8 @@ int main()
 {
     COUT << "=========OTAUPDATER=============" << VERSION << endl;
     int index = 0;
-    OtaCheck();
+    // OtaCheck();
+    LogCheck();
     while (true)
     {
         //     if (index % 10 == 0)

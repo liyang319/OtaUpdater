@@ -203,7 +203,7 @@ int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::stri
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
-
+        COUT << "Upload Successfully : " << fileName << endl;
         curl_easy_cleanup(curl);
         curl_formfree(formpost);
         curl_slist_free_all(headerlist);
