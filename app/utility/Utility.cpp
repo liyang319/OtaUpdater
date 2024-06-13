@@ -25,7 +25,7 @@ std::string Utility::removeTrailingNewline(std::string str)
 std::string Utility::getFileContent(std::string fileName)
 {
     std::ifstream file(fileName);
-    std::string content;
+    std::string content = "";
     std::string line;
 
     if (file.is_open())

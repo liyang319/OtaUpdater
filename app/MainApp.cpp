@@ -27,7 +27,7 @@ using namespace rapidjson;
 
 // #define DEFAULT_VERSION_PATH "../app/VERSION"
 #define DEFAULT_VERSION_PATH "/var/version"
-#define DEVICE_SN "4854604D7765A027"
+// #define DEVICE_SN "4854604D7765A027"
 #define APP_NAME "ControlBox"
 #define CONFIG_NAME "ControlBox.ini"
 #define UPDATER_NAME "OtaUpdater"
@@ -38,12 +38,14 @@ using namespace rapidjson;
 #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
 #define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-// #define DEFAULT_OTA_SAVE_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_save/"
-// #define DEFAULT_OTA_BACKUP_PATH "/Users/yli/Desktop/WorkCode/OtaUpdater/OtaUpdater/build/output/ota_backup/"
-// #define DEFAULT_APP_PATH "/Users/yli/Desktop/Kewell/KewellMidware/server/ControlBox"
-#define URL_CHECK_OTA "http://192.168.80.235:8000/otacheck"
-#define URL_UPLOAD_LOG "http://192.168.80.235:8000/upload"
-#define URL_CHECK_LOG "http://192.168.80.235:8000/logcheck"
+// #define URL_CHECK_OTA "http://192.168.80.235:8901/otacheck"
+// #define URL_UPLOAD_LOG "http://192.168.80.235:8901/upload"
+// #define URL_CHECK_LOG "http://192.168.80.235:8901/logcheck"
+
+#define URL_CHECK_OTA "http://218.94.69.218:8901/otacheck"
+#define URL_UPLOAD_LOG "http://218.94.69.218:8901/upload"
+#define URL_CHECK_LOG "http://218.94.69.218:8901/logcheck"
+
 #define DEFAULT_SN_FILE_PATH "/var/sn"
 #define LOGVAL_NEED_UPLOAD "upload"
 #define MAX_LAUNCH_TRY_TIME 3
@@ -70,10 +72,11 @@ void OtaBackup()
 void OtaReplace()
 {
     // Utility::killApp(APP_NAME);
-    sleep(1);
+    sleep(2);
     COUT << "Replace old version" << std::endl;
     // Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
     Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + UPDATE_REPLACE_SCRIPT_NAME, false);
+    sleep(1);
 }
 
 void OtaUnzipPkg(std::string pkgName)
@@ -134,7 +137,7 @@ int DoOTA(std::string json)
     // 打印获取的值
     COUT << "状态: " << status << std::endl;
     COUT << "是否有新版本: " << needUpdate << std::endl;
-    COUT << "URL: " << url << std::endl;
+    COUT << "URL: ======" << url << "========" << std::endl;
     COUT << "MD5: " << md5 << std::endl;
     COUT << "newVer: " << newVer << std::endl;
     if (needUpdate == "true")
@@ -160,11 +163,15 @@ int DoOTA(std::string json)
                 COUT << "Invalid Md5" << std::endl;
                 return 0;
             }
+            else
+            {
+                COUT << "Md5 OK" << std::endl;
+            }
             // 备份原有版本到ota_backup
             OtaBackup();
             // 解压升级包，修改权限
             OtaUnzipPkg(outputFile);
-            // 替换新文件
+            // // 替换新文件
             OtaReplace();
             // sleep(5);
             RestartApp();
@@ -182,12 +189,23 @@ void OtaCheck()
     COUT << "Checking OTA" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
+
+    strVer = "1.0.0";
+    if (strVer.empty())
+    {
+        strVer = "none";
+    }
+    if (deviceSN.empty())
+    {
+        deviceSN = "none";
+    }
+
     // std::string deviceSN = DEVICE_SN;
 
     std::map<std::string, std::string> mapParam = {
         {"cmd", "otacheck"},
         {"version", strVer},
-        {"sn", DEVICE_SN}};
+        {"sn", deviceSN}};
 
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     // COUT << "====check params====" << strParam << endl;
@@ -241,7 +259,15 @@ void LogCheck()
     COUT << "Checking if need to upload log" << i++ << std::endl;
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
-    // std::string deviceSN = DEVICE_SN;
+
+    if (strVer.empty())
+    {
+        strVer = "none";
+    }
+    if (deviceSN.empty())
+    {
+        deviceSN = "none";
+    }
 
     std::map<std::string, std::string>
         mapParam = {
@@ -262,16 +288,17 @@ void LogCheck()
 int main()
 {
     COUT << "=========OTAUPDATER=============" << VERSION << endl;
-    int index = 0;
+    int index = 1;
     // OtaCheck();
-    LogCheck();
+    // LogCheck();
+
     while (true)
     {
-        //     if (index % 10 == 0)
-        //         OtaCheck();
-        //     else
-        //         LogCheck();
-        //     // std::this_thread::sleep_for(std::chrono::hours(1));
+        if (index == 3)
+            OtaCheck();
+        else if (index % 6 == 0)
+            LogCheck();
+        // std::this_thread::sleep_for(std::chrono::hours(1));
         std::this_thread::sleep_for(std::chrono::seconds(10));
         COUT << VERSION << "---------------" << index++ << endl;
     }
