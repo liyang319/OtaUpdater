@@ -129,7 +129,7 @@ size_t HttpUtility::writeCallback(void *ptr, size_t size, size_t nmemb, void *st
     return written;
 }
 
-int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::string fileName)
+int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::string fileName, long timeout)
 {
     CURL *curl;
     CURLcode res;
@@ -146,6 +146,7 @@ int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::stri
     if (curl)
     {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback_upload);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
@@ -173,7 +174,7 @@ size_t HttpUtility::write_callback_upload(void *ptr, size_t size, size_t nmemb, 
     return written;
 }
 
-int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::string fileName, std::string deviceSN)
+int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::string fileName, std::string deviceSN, long timeout)
 {
     CURL *curl;
     CURLcode res;
@@ -183,14 +184,20 @@ int HttpUtility::httpUploadFile(std::string url, std::string filePath, std::stri
     static const char buf[] = "Expect:";
 
     curl_global_init(CURL_GLOBAL_ALL);
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_END);
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "fileName", CURLFORM_COPYCONTENTS, fileName.c_str(), CURLFORM_END);
+    // curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_CONTENTTYPE, "text/plain ", CURLFORM_END);
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_CONTENTTYPE, "multipart/form-data", CURLFORM_END);
+    // curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_FILENAME, fileName.c_str(), // 使用实际的文件名
+    //              CURLFORM_END);
+    // curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, filePath.c_str(), CURLFORM_END);
+    // curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "fileName", CURLFORM_COPYCONTENTS, fileName.c_str(), CURLFORM_END);
     curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "deviceSN", CURLFORM_COPYCONTENTS, deviceSN.c_str(), CURLFORM_END);
     curl = curl_easy_init();
 
     if (curl)
     {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1); // 重定向
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback_upload);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);

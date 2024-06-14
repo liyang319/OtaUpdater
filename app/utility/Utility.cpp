@@ -63,6 +63,23 @@ int Utility::replaceFileWithCmd(std::string orginalFile, std::string newFile)
     }
 }
 
+bool Utility::isFileEmpty(std::string filename)
+{
+    std::ifstream file(filename, std::ios::binary | std::ios::ate); // 打开文件并移动文件指针到文件末尾
+    if (file.is_open())
+    {
+        std::streampos size = file.tellg(); // 获取文件指针位置，即文件大小
+        file.close();                       // 关闭文件流
+
+        return size == 0;
+    }
+    else
+    {
+        std::cout << "无法打开文件" << std::endl;
+        return false;
+    }
+}
+
 int replaceFile(const std::string orginalFile, const std::string newFile)
 {
     std::ifstream newFileInput(newFile);
@@ -187,6 +204,7 @@ void Utility::fillVersionFile(std::string filename, std::string content)
 int Utility::unzipFile(std::string zipFileName, std::string outputDirectory)
 {
     std::string command = "unzip " + zipFileName + " -d " + outputDirectory;
+    COUT << "-----unzipFile-----" << command << endl;
     int result = system(command.c_str());
     // if (result != 0)
     // {
@@ -368,4 +386,16 @@ bool Utility::startApp(std::string executablePath, bool bBackground)
     {
         return false;
     }
+}
+
+void Utility::FeedWatchDog()
+{
+    std::cout << "-----------FeedWatchDog----------" << endl;
+    system("echo 1 > /dev/watchdog");
+}
+
+void Utility::CloseWatchDog()
+{
+    std::cout << "-----------CloseWatchDog----------" << endl;
+    system("echo V > /dev/watchdog");
 }

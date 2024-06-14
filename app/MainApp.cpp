@@ -26,7 +26,7 @@ using namespace rapidjson;
 // maeusing namespace std;
 
 // #define DEFAULT_VERSION_PATH "../app/VERSION"
-#define DEFAULT_VERSION_PATH "/var/version"
+#define DEFAULT_VERSION_PATH "/opt/version"
 // #define DEVICE_SN "4854604D7765A027"
 #define APP_NAME "ControlBox"
 #define CONFIG_NAME "ControlBox.ini"
@@ -38,20 +38,21 @@ using namespace rapidjson;
 #define DEFAULT_OTA_BACKUP_PATH "/home/app/ota_backup/"
 #define DEFAULT_APP_PATH "/home/app/ControlBox"
 #define DEFAULT_APP_RIGHTS "777"
-// #define URL_CHECK_OTA "http://192.168.80.235:8901/otacheck"
-// #define URL_UPLOAD_LOG "http://192.168.80.235:8901/upload"
-// #define URL_CHECK_LOG "http://192.168.80.235:8901/logcheck"
+#define USE_DOCKER
 
+#ifdef USE_DOCKER
 #define URL_CHECK_OTA "http://218.94.69.218:8901/otacheck"
 #define URL_UPLOAD_LOG "http://218.94.69.218:8901/upload"
 #define URL_CHECK_LOG "http://218.94.69.218:8901/logcheck"
+#else
+#define URL_CHECK_OTA "http://192.168.80.235:8901/otacheck"
+#define URL_UPLOAD_LOG "http://192.168.80.235:8901/upload"
+#define URL_CHECK_LOG "http://192.168.80.235:8901/logcheck"
+#endif
 
-#define DEFAULT_SN_FILE_PATH "/var/sn"
+#define DEFAULT_SN_FILE_PATH "/opt/sn"
 #define LOGVAL_NEED_UPLOAD "upload"
 #define MAX_LAUNCH_TRY_TIME 3
-
-// #define CONCAT(x, y) x##y
-// #define FULL_PATH(x, y) CONCAT(x, y)
 
 int i = 0;
 
@@ -76,16 +77,31 @@ void OtaReplace()
     COUT << "Replace old version" << std::endl;
     // Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
     Utility::startApp(std::string(DEFAULT_OTA_SAVE_PATH) + UPDATE_REPLACE_SCRIPT_NAME, false);
+    if (Utility::isFileEmpty(DEFAULT_APP_PATH))
+    {
+        // if (!Utility::isFileEmpty(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME))
+        // {
+        //     COUT << "Replace again!!! with new version" << std::endl;
+        //     Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME);
+        // }
+        // else
+        // {
+        COUT << "Replace again!!! with backup version" << std::endl;
+        Utility::replaceFileWithCmd(DEFAULT_APP_PATH, std::string(DEFAULT_OTA_BACKUP_PATH) + APP_NAME);
+        // }
+    }
     sleep(1);
 }
 
 void OtaUnzipPkg(std::string pkgName)
 {
     COUT << "Unzip Ota package" << endl;
-    Utility::unzipFile(pkgName, DEFAULT_OTA_SAVE_PATH);
+    int status = Utility::unzipFile(pkgName, DEFAULT_OTA_SAVE_PATH);
+    sleep(2);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + APP_NAME, DEFAULT_APP_RIGHTS);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + RESTORE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
     Utility::changeFileMode(std::string(DEFAULT_OTA_SAVE_PATH) + UPDATE_REPLACE_SCRIPT_NAME, DEFAULT_APP_RIGHTS);
+    COUT << "Unzip Ota package status = " << status << endl;
 }
 
 void RestartApp()
@@ -173,8 +189,10 @@ int DoOTA(std::string json)
             OtaUnzipPkg(outputFile);
             // // 替换新文件
             OtaReplace();
+            Utility::CloseWatchDog(); // 升级关狗
             // sleep(5);
             RestartApp();
+            Utility::FeedWatchDog(); // 重新开狗
         }
     }
     else
@@ -190,7 +208,6 @@ void OtaCheck()
     std::string strVer = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_VERSION_PATH));
     std::string deviceSN = Utility::removeTrailingNewline(Utility::getFileContent(DEFAULT_SN_FILE_PATH));
 
-    strVer = "1.0.0";
     if (strVer.empty())
     {
         strVer = "none";
@@ -210,7 +227,7 @@ void OtaCheck()
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     // COUT << "====check params====" << strParam << endl;
     std::string response;
-    CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 1000);
+    CURLcode getRes = HttpUtility::httpget(URL_CHECK_OTA, strParam, response, 30);
     if (getRes == CURLE_OK)
     {
         COUT << "Get request successful" << std::endl;
@@ -248,6 +265,7 @@ int DoLogOperation(std::string json, std::string deviceSN)
     if (logStatus == LOGVAL_NEED_UPLOAD)
     {
         // Do upload here
+        // std::string logFileName = std::string(APP_BASE_PATH) + "controlbox_" + logDate + ".log";
         std::string logFileName = "controlbox_" + logDate + ".log";
         COUT << "-----logfile-----" << logFileName << endl;
         HttpUtility::httpUploadFile(URL_UPLOAD_LOG, logFileName, logFileName, deviceSN);
@@ -276,7 +294,7 @@ void LogCheck()
             {"sn", deviceSN}};
     std::string strParam = HttpUtility::buildQueryString(mapParam);
     std::string response;
-    CURLcode getRes = HttpUtility::httpget(URL_CHECK_LOG, strParam, response, 1000);
+    CURLcode getRes = HttpUtility::httpget(URL_CHECK_LOG, strParam, response, 30);
     if (getRes == CURLE_OK)
     {
         COUT << "Get request successful" << endl;
@@ -291,15 +309,13 @@ int main()
     int index = 1;
     // OtaCheck();
     // LogCheck();
-
+    std::this_thread::sleep_for(std::chrono::seconds(70));
     while (true)
     {
-        if (index == 3)
-            OtaCheck();
-        else if (index % 6 == 0)
-            LogCheck();
+        OtaCheck();
+        std::this_thread::sleep_for(std::chrono::seconds(30));
+        LogCheck();
+        std::this_thread::sleep_for(std::chrono::seconds(30));
         // std::this_thread::sleep_for(std::chrono::hours(1));
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-        COUT << VERSION << "---------------" << index++ << endl;
     }
 }

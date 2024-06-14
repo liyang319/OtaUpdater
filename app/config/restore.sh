@@ -5,7 +5,7 @@ desPath="/home/app"
 AppName="ControlBox"
 UpdaterName="OtaUpdater"
 # fileList=("ControlBox" "OtaUpdater" "ControlBox.ini")
-fileList=("ControlBox" "ControlBox.ini")
+fileList=("ControlBox")
 
 # 检查源文件路径是否存在
 if [ -d "$srcPath" ]; then
@@ -14,6 +14,8 @@ if [ -d "$srcPath" ]; then
     echo "$AppName 文件存在，杀死$AppName进程"
     pkill -f $AppName
     # pkill -f $UpdaterName
+    echo "Waiting..."
+    sleep 1
   fi
 
 # 源文件路径存在，开始拷贝操作

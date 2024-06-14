@@ -25,6 +25,9 @@ public:
     static bool fileExists(std::string fileName);
     static bool isExecutable(std::string fileName);
     static bool startApp(std::string executablePath, bool bBackground);
+    static bool isFileEmpty(std::string filename);
+    static void FeedWatchDog();
+    static void CloseWatchDog();
 };
 
 #endif // UTILITY_H
